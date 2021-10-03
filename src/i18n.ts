@@ -10,6 +10,11 @@ enum SupportedLanguages {
 interface LanguageResource {
   welcome: string;
   homeInstruction: string;
+  loading: string;
+  seenAll: string;
+  checkIn: string;
+  checkOut: string;
+  pickupTime: string;
 }
 
 interface DefaultNamespaceWrapper {
@@ -25,12 +30,22 @@ const resources: LanguageResources = {
     translation: {
       welcome: "Willkommen bei Famly infinite scroll!",
       homeInstruction: "Bitte warten Sie, während die Daten geladen werden.",
+      loading: "Lädt...",
+      seenAll: "Keine weiteren Kinder!",
+      checkIn: "Einchecken",
+      checkOut: "Auschecken",
+      pickupTime: "Abholzeit",
     },
   },
   en: {
     translation: {
       welcome: "Welcome to Famly infinite scroll!",
       homeInstruction: "Please wait while the data is being fetched.",
+      loading: "Loading...",
+      seenAll: "No more children found!",
+      checkIn: "Checkin",
+      checkOut: "Checkout",
+      pickupTime: "Pickup time",
     },
   },
 };

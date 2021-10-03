@@ -41,11 +41,11 @@ const HomePageSuspending = () => {
           dataLength={numberOfItemsToRender}
           next={increaseMultiplier}
           hasMore={numberOfItemsToRender < children.length}
-          loader={<h4>Loading...</h4>}
+          loader={<h4>{t("loading")}</h4>}
           height="300px"
           endMessage={
             <p style={{ textAlign: "center" }}>
-              <b>Yay! You have seen it all</b>
+              <b>{t("seenAll")}</b>
             </p>
           }
         >
@@ -67,6 +67,11 @@ function RenderChild(props: { child: Child }): JSX.Element {
   const { child } = props;
   const [checkinHour, setCheckinHour] = React.useState(16);
   const [checkinMinute, setCheckinMinute] = React.useState(0);
+  const [error, setError] = React.useState(undefined);
+  const handleError = React.useCallback(
+    (error) => setError(error.statusText),
+    []
+  );
   const updateCheckinHour = React.useCallback(
     (event) => setCheckinHour(event.target.value),
     []
@@ -75,18 +80,24 @@ function RenderChild(props: { child: Child }): JSX.Element {
     (event) => setCheckinMinute(event.target.value),
     []
   );
-  const onCheckin = React.useCallback(() => {
-    checkin(child, `${checkinHour}:${checkinMinute}`);
-  }, [child, checkinHour, checkinMinute]);
-  const onCheckout = React.useCallback(() => {
-    checkout(child);
-  }, [child]);
+  const onCheckin = React.useCallback(
+    () =>
+      checkin(child, `${checkinHour}:${checkinMinute}`).catch((error) =>
+        handleError(error)
+      ),
+    [child, checkinHour, checkinMinute, handleError]
+  );
+  const onCheckout = React.useCallback(
+    () => checkout(child).catch((error) => handleError(error)),
+    [child, handleError]
+  );
+  const [t] = useLanguageTranslation();
   return (
     <div>
       <span>{child.name.fullName}</span>
       <div>
         <div>
-          <span>Pickup time</span>
+          <span>{t("pickupTime")}</span>
           <input
             type="number"
             min={0}
@@ -102,17 +113,18 @@ function RenderChild(props: { child: Child }): JSX.Element {
             value={checkinMinute}
             onChange={updateCheckinMinute}
           />
-          <button onClick={onCheckin}>Checkin</button>
+          <button onClick={onCheckin}>{t("checkIn")}</button>
         </div>
         <div>
-          <button onClick={onCheckout}>Checkout</button>
+          <button onClick={onCheckout}>{t("checkOut")}</button>
         </div>
       </div>
+      <span style={{ color: "red" }}>{error}</span>
     </div>
   );
 }
 
-function checkin(child: Child, pickupTime: string): Promise<void> {
+function checkin(child: Child, pickupTime: string): Promise<unknown> {
   return fetch(getCheckinUrl(child.id), {
     headers: getHeaders(),
     method: "POST",
@@ -123,7 +135,7 @@ function checkin(child: Child, pickupTime: string): Promise<void> {
   }).then((response) => response.json());
 }
 
-function checkout(child: Child): Promise<void> {
+function checkout(child: Child): Promise<unknown> {
   return fetch(getCheckoutUrl(child.id), {
     headers: getHeaders(),
     method: "POST",
