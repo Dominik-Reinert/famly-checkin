@@ -3,7 +3,7 @@ import { jsx } from "@emotion/react";
 import React from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useLanguageTranslation } from "../i18n";
-import { daycareStore } from "../store/daycare_store";
+import { Child, daycareStore } from "../store/daycare_store";
 import { useStyleContext } from "../style_context/use_style_context";
 import { homePageStyle, homePageSuspendingStyle } from "./home_page_style";
 
@@ -30,24 +30,19 @@ const HomePageSuspending = () => {
   const styleContext = useStyleContext();
   const [t] = useLanguageTranslation();
   const children = daycareStore.getCurrentDataAdapted().children;
-  const numberOfItemsMultiplier = React.useRef(1);
-  const numberOfItemsToScroll = 20;
-  const numberOfItemsToRender = React.useMemo(
-    () => numberOfItemsToScroll * numberOfItemsMultiplier.current,
-    [children, numberOfItemsToScroll, numberOfItemsMultiplier]
-  );
-  const increaseMultiplier = React.useCallback(
-    () => numberOfItemsMultiplier.current++,
-    [numberOfItemsMultiplier, numberOfItemsMultiplier.current]
-  );
+  const [numberOfItemsToRender, setNumberOfItemstoRender] = React.useState(20);
+  const increaseMultiplier = React.useCallback(() => {
+    setNumberOfItemstoRender((currentNumber) => currentNumber + 20);
+  }, []);
   return (
     <div css={homePageSuspendingStyle(styleContext)}>
       <div className="scrollable-content">
         <InfiniteScroll
-          dataLength={children.length}
+          dataLength={numberOfItemsToRender}
           next={increaseMultiplier}
           hasMore={numberOfItemsToRender < children.length}
           loader={<h4>Loading...</h4>}
+          height="300px"
           endMessage={
             <p style={{ textAlign: "center" }}>
               <b>Yay! You have seen it all</b>
@@ -55,9 +50,12 @@ const HomePageSuspending = () => {
           }
         >
           {children
-            .slice(0, Math.max(numberOfItemsToRender, children.length) - 1)
-            .map((child) => (
-              <Child key={child.name.fullName} />
+            .slice(0, Math.min(numberOfItemsToRender, children.length) - 1)
+            .map((child, idx) => (
+              <RenderChild
+                key={`${child.name.fullName}-${idx}`}
+                child={child}
+              />
             ))}
         </InfiniteScroll>
       </div>
@@ -65,6 +63,86 @@ const HomePageSuspending = () => {
   );
 };
 
-function Child(props: any): JSX.Element {
-  return <div></div>;
+function RenderChild(props: { child: Child }): JSX.Element {
+  const { child } = props;
+  const [checkinHour, setCheckinHour] = React.useState(16);
+  const [checkinMinute, setCheckinMinute] = React.useState(0);
+  const updateCheckinHour = React.useCallback(
+    (event) => setCheckinHour(event.target.value),
+    []
+  );
+  const updateCheckinMinute = React.useCallback(
+    (event) => setCheckinMinute(event.target.value),
+    []
+  );
+  const onCheckin = React.useCallback(() => {
+    checkin(child, `${checkinHour}:${checkinMinute}`);
+  }, [child, checkinHour, checkinMinute]);
+  const onCheckout = React.useCallback(() => {
+    checkout(child);
+  }, [child]);
+  return (
+    <div>
+      <span>{child.name.fullName}</span>
+      <div>
+        <div>
+          <span>Pickup time</span>
+          <input
+            type="number"
+            min={0}
+            max={24}
+            value={checkinHour}
+            onChange={updateCheckinHour}
+          />
+          :
+          <input
+            type="number"
+            min={0}
+            max={59}
+            value={checkinMinute}
+            onChange={updateCheckinMinute}
+          />
+          <button onClick={onCheckin}>Checkin</button>
+        </div>
+        <div>
+          <button onClick={onCheckout}>Checkout</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function checkin(child: Child, pickupTime: string): Promise<void> {
+  return fetch(getCheckinUrl(child.id), {
+    headers: getHeaders(),
+    method: "POST",
+    body: JSON.stringify({
+      accessToken: "234ffdb8-0889-4be3-b096-97ab1679752c",
+      pickupTime,
+    }),
+  }).then((response) => response.json());
+}
+
+function checkout(child: Child): Promise<void> {
+  return fetch(getCheckoutUrl(child.id), {
+    headers: getHeaders(),
+    method: "POST",
+    body: JSON.stringify({
+      accessToken: "234ffdb8-0889-4be3-b096-97ab1679752c",
+    }),
+  }).then((response) => response.json());
+}
+
+function getHeaders(): Headers {
+  const headers = new Headers();
+  headers.set("Content-Type", "application/json");
+  return headers;
+}
+
+function getCheckinUrl(id: string): string {
+  return `https://tryfamly.co/api/v2/children/${id}/checkins`;
+}
+
+function getCheckoutUrl(id: string): string {
+  return `https://tryfamly.co/api/v2/children/${id}/checkout`;
 }

@@ -24,36 +24,37 @@ export function homePageStyle(styleContext: StyleContext): SerializedStyles {
   `;
 }
 
-export function homePageSuspendingStyle(styleContext: StyleContext): SerializedStyles {
+export function homePageSuspendingStyle(
+  styleContext: StyleContext
+): SerializedStyles {
   return css`
-  label: home-page;
-  height: 80%;
+    label: home-page;
+    height: 80%;
 
-  .header {
-    display: flex;
-    width: 70%;
-    margin: auto;
-    align-content: center;
-    justify-content: space-around;
-    padding: 16px;
-    text-align: left;
-
-    > * {
-      flex: 1 0 0;
-      color: ${styleContext.shades.text};
-      font-size: ${styleContext.sizes.font.text};
-      text-align: center;
-    }
-
-    .name {
+    .header {
+      display: flex;
+      width: 70%;
+      margin: auto;
+      align-content: center;
+      justify-content: space-around;
+      padding: 16px;
       text-align: left;
+
+      > * {
+        flex: 1 0 0;
+        color: ${styleContext.shades.text};
+        font-size: ${styleContext.sizes.font.text};
+        text-align: center;
+      }
+
+      .name {
+        text-align: left;
+      }
     }
-  }
 
-  .scrollable-content {
-    overflow-y: auto;
-    height: calc(100% - 60px);
-  }
-`;
+    .scrollable-content {
+      overflow-y: auto;
+      height: 300px;
+    }
+  `;
 }
-

@@ -23,13 +23,13 @@ type LanguageResources = {
 const resources: LanguageResources = {
   de: {
     translation: {
-      welcome: "Willkommen bei project template!",
+      welcome: "Willkommen bei Famly infinite scroll!",
       homeInstruction: "Bitte warten Sie, während die Daten geladen werden.",
     },
   },
   en: {
     translation: {
-      welcome: "Welcome to project template!",
+      welcome: "Welcome to Famly infinite scroll!",
       homeInstruction: "Please wait while the data is being fetched.",
     },
   },

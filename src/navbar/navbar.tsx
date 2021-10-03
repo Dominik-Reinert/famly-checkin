@@ -10,7 +10,7 @@ export function Navbar(): JSX.Element {
     <div css={navbarStyle(styleContext)}>
       <div className="page-name-wrapper">
         <img className="logo" src="./home.svg" alt="logo" />
-        <span className="page-name">project template</span>
+        <span className="page-name">Famly Infinite scroll</span>
       </div>
     </div>
   );

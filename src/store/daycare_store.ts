@@ -8,7 +8,7 @@ interface ChildName {
   lastName: string;
 }
 
-interface Child {
+export interface Child {
   id: string;
   name: ChildName;
 }
